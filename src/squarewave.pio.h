@@ -13,27 +13,28 @@
 // ---------- //
 
 #define squarewave_wrap_target 0
-#define squarewave_wrap 8
+#define squarewave_wrap 9
 #define squarewave_pio_version 0
 
 static const uint16_t squarewave_program_instructions[] = {
             //     .wrap_target
     0xe083, //  0: set    pindirs, 3
-    0xe201, //  1: set    pins, 1                [2]
-    0xe002, //  2: set    pins, 2
+    0xe301, //  1: set    pins, 1                [3]
+    0xe102, //  2: set    pins, 2                [1]
     0x00c5, //  3: jmp    pin, 5
     0x0001, //  4: jmp    1
     0xe501, //  5: set    pins, 1                [5]
-    0xe402, //  6: set    pins, 2                [4]
-    0x00c5, //  7: jmp    pin, 5
-    0x0001, //  8: jmp    1
+    0xa142, //  6: nop                           [1]
+    0xe402, //  7: set    pins, 2                [4]
+    0x02c5, //  8: jmp    pin, 5                 [2]
+    0x0001, //  9: jmp    1
             //     .wrap
 };
 
 #if !PICO_NO_HARDWARE
 static const struct pio_program squarewave_program = {
     .instructions = squarewave_program_instructions,
-    .length = 9,
+    .length = 10,
     .origin = -1,
     .pio_version = squarewave_pio_version,
 #if PICO_PIO_VERSION > 0
@@ -44,6 +45,44 @@ static const struct pio_program squarewave_program = {
 static inline pio_sm_config squarewave_program_get_default_config(uint offset) {
     pio_sm_config c = pio_get_default_sm_config();
     sm_config_set_wrap(&c, offset + squarewave_wrap_target, offset + squarewave_wrap);
+    return c;
+}
+#endif
+
+// ------- //
+// decoder //
+// ------- //
+
+#define decoder_wrap_target 0
+#define decoder_wrap 5
+#define decoder_pio_version 0
+
+static const uint16_t decoder_program_instructions[] = {
+            //     .wrap_target
+    0xe081, //  0: set    pindirs, 1
+    0x2021, //  1: wait   0 pin, 1
+    0x23a1, //  2: wait   1 pin, 1               [3]
+    0x00c5, //  3: jmp    pin, 5
+    0x1001, //  4: jmp    1               side 0
+    0x1801, //  5: jmp    1               side 1
+            //     .wrap
+};
+
+#if !PICO_NO_HARDWARE
+static const struct pio_program decoder_program = {
+    .instructions = decoder_program_instructions,
+    .length = 6,
+    .origin = -1,
+    .pio_version = decoder_pio_version,
+#if PICO_PIO_VERSION > 0
+    .used_gpio_ranges = 0x0
+#endif
+};
+
+static inline pio_sm_config decoder_program_get_default_config(uint offset) {
+    pio_sm_config c = pio_get_default_sm_config();
+    sm_config_set_wrap(&c, offset + decoder_wrap_target, offset + decoder_wrap);
+    sm_config_set_sideset(&c, 2, true, false);
     return c;
 }
 #endif

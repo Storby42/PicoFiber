@@ -8,13 +8,27 @@
 .program squarewave
     set pindirs, 3   ; Set pin to output
 again:
-    set pins, 1 [2]  ; Drive pin high and then delay for one cycle
-    set pins, 2      ; Drive pin low
+    set pins, 1 [3]  ; Drive pin high and then delay for one cycle
+    set pins, 2 [1]     ; Drive pin low
     jmp pin, stall
     jmp again        ; Set PC to label `again`
 stall:
     set pins, 1 [5]  ; Drive pin high and then delay for one cycle
+    nop [1]
     set pins, 2 [4]     ; Drive pin low
-    jmp pin, stall
+    jmp pin, stall [2]
     jmp again 
+
+
+.program decoder
+.side_set 1 opt
+    set pindirs, 1   ; Set pin to output
+read:
+    wait 0 pin 1 ; read from gpio18
+    wait 1 pin 1 [3]
+    jmp pin, long ; also read from gpio 18
+short:
+    jmp read side 0
+long:
+    jmp read side 1
 
