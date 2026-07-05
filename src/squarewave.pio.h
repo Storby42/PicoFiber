@@ -49,6 +49,48 @@ static inline pio_sm_config squarewave_program_get_default_config(uint offset) {
 }
 #endif
 
+// --------- //
+// decodernt //
+// --------- //
+
+#define decodernt_wrap_target 0
+#define decodernt_wrap 10
+#define decodernt_pio_version 0
+
+static const uint16_t decodernt_program_instructions[] = {
+            //     .wrap_target
+    0xe083, //  0: set    pindirs, 3
+    0x00c1, //  1: jmp    pin, 1
+    0x00c4, //  2: jmp    pin, 4
+    0x0002, //  3: jmp    2
+    0xa442, //  4: nop                           [4]
+    0xa442, //  5: nop                           [4]
+    0x00c9, //  6: jmp    pin, 9
+    0xe000, //  7: set    pins, 0
+    0x0001, //  8: jmp    1
+    0xe003, //  9: set    pins, 3
+    0x0001, // 10: jmp    1
+            //     .wrap
+};
+
+#if !PICO_NO_HARDWARE
+static const struct pio_program decodernt_program = {
+    .instructions = decodernt_program_instructions,
+    .length = 11,
+    .origin = -1,
+    .pio_version = decodernt_pio_version,
+#if PICO_PIO_VERSION > 0
+    .used_gpio_ranges = 0x0
+#endif
+};
+
+static inline pio_sm_config decodernt_program_get_default_config(uint offset) {
+    pio_sm_config c = pio_get_default_sm_config();
+    sm_config_set_wrap(&c, offset + decodernt_wrap_target, offset + decodernt_wrap);
+    return c;
+}
+#endif
+
 // ------- //
 // decoder //
 // ------- //

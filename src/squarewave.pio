@@ -19,13 +19,31 @@ stall:
     jmp pin, stall [2]
     jmp again 
 
+.program decodernt
+    set pindirs, 3   ; Set pin to output
+wait0:
+    jmp pin, wait0
+wait1: //I did this because the jmp control pin was already working, and the wait function was not. Sooo I just used jmp for everything.
+    jmp pin, stall
+    jmp wait1
+stall:
+    nop [4]
+    nop [4]
+    jmp pin, high
+low:
+    set pins, 0
+    jmp wait0
+high:
+    set pins, 3
+    jmp wait0
+
 
 .program decoder
 .side_set 1 opt
     set pindirs, 1   ; Set pin to output
 read:
-    wait 0 pin 1 ; read from gpio18
-    wait 1 pin 1 [3]
+    wait 0 pin 1
+    wait 1 pin 1  [3]
     jmp pin, long ; also read from gpio 18
 short:
     jmp read side 0
