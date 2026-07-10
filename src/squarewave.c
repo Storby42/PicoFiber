@@ -26,7 +26,7 @@
 #define TX_PIN 3
 #define RX_PIN 2
 #define MODULATED_TX_PIN 0
-#define MODULATED_RX_PIN 18
+#define MODULATED_RX_PIN 5
 
 int main() {
     // Pick one PIO instance arbitrarily. We're also arbitrarily picking state
